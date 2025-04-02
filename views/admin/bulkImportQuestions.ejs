@@ -1,0 +1,168 @@
+<%- include('../layout/header.ejs') %>
+    <div class="layout-wrapper layout-content-navbar">
+        <div class="layout-container">
+            <%- include('../layout/sidebar.ejs') %>
+            <div class="content-wrapper">
+                <div class="container-xxl flex-grow-1 container-p-y">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h4 class="py-3 mb-4">
+                                <span class="text-muted fw-light">Questions /</span> Bulk Import Questions
+                            </h4>
+                            <!-- For debugging - Display quiz data (REMOVE IN PRODUCTION) -->
+                            <div style="display: none;">
+                                <h5>Debug Info:</h5>
+                                <pre id="debug-info">
+                                    <% quiz.forEach(function(q) { %>
+                                        Quiz ID: <%= q._id %>, Name: <%= q.name %>, Category ID: <%= q.categoryId %>
+                                    <% }); %>
+                                </pre>
+                            </div>
+                            
+                            <div class="card mb-4">
+                                <form action="/bulk-import-questions" method="post" enctype="multipart/form-data">
+                                    <div class="card-body">
+                                        <% if(typeof message !== 'undefined'){ %>
+                                            <div class="alert alert-primary alert-dismissible" role="alert"><%= message %>
+                                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                            </div>
+                                         <% } %>
+                                         <% if(flash && flash.error && flash.error.length > 0){ %>
+                                            <div class="alert alert-danger alert-dismissible" role="alert">
+                                                <%= flash.error %>
+                                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                            </div>
+                                        <% } %>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="row mb-3">
+                                                    <div class="col-md-6">
+                                                        <div class="row">
+                                                            <div class="col-sm-2">
+                                                                <label class="col-form-label" for="basic-icon-default-fullname">Category</label>
+                                                            </div>
+                                                            <div class="col-sm-10">
+                                                                <div class="input-group">
+                                                                    <select class="form-select" name="categoryId" id="defaultSelect" required>
+                                                                        <% if(category.length > 0 ) { %>
+                                                                            <option value="" disabled selected>Select category...</option>
+                                                                            <% for(let j=0; j < category.length; j++) {  %>
+                                                                                <option value="<%= category[j]._id %>"><%= category[j].name %></option>
+                                                                            <% } } %>
+                                                                        </select>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">  
+                                                        <div class="row">
+                                                            <div class="col-sm-3" style="padding: 0px; text-align: right;">
+                                                                <label class="col-form-label" for="basic-icon-default-fullname">Quiz Name</label>
+                                                            </div>
+                                                            <div class="col-sm-9">
+                                                                <div class="input-group">
+                                                                    <select class="form-select" name="quizId" id="quizSelect" required>
+                                                                        <% if(quiz.length > 0 ) { %>
+                                                                            <option value="" disabled selected>Select Quiz...</option>
+                                                                            <% for(let i=0; i < quiz.length; i++) {  %>
+                                                                                <option value="<%= quiz[i]._id %>" data-categoryid="<%= String(quiz[i].categoryId) %>"><%= quiz[i].name %></option>
+                                                                            <% } } %>
+                                                                        </select>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="row mb-3">
+                                                    <div class="col-md-12">
+                                                        <div class="row">
+                                                            <div class="col-sm-1">
+                                                                <label class="col-form-label" for="excel-file">Excel File</label>
+                                                            </div>
+                                                            <div class="col-sm-6">
+                                                                <div class="input-group">
+                                                                    <input type="file" class="form-control" name="excel_file" id="excel-file" accept=".xlsx, .xls" required/>
+                                                                </div>
+                                                                <small class="text-muted">Upload Excel file with questions data. <a href="/assets/templates/questions_template.xlsx" download>Download Template</a></small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="row mb-3">
+                                                    <div class="col-md-12">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="is_active" id="is_active">
+                                                            <label class="form-check-label" for="is_active">Is Active</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="row mt-4">
+                                                    <div class="col-md-12 text-center">
+                                                        <h5>Excel File Format Instructions</h5>
+                                                        <div class="alert alert-info">
+                                                            <p>The Excel file should follow this format:</p>
+                                                            <ul class="text-start mb-0">
+                                                                <li>First column: <strong>question_title</strong> - The question text</li>
+                                                                <li>Second column: <strong>question_type</strong> - Type of question (text_only, true_false, images, audio)</li>
+                                                                <li>Third column: <strong>option_a</strong> - First option</li>
+                                                                <li>Fourth column: <strong>option_b</strong> - Second option</li>
+                                                                <li>Fifth column: <strong>option_c</strong> - Third option</li>
+                                                                <li>Sixth column: <strong>option_d</strong> - Fourth option</li>
+                                                                <li>Seventh column: <strong>answer</strong> - Correct answer (a, b, c, d, true, false)</li>
+                                                                <li>Eighth column: <strong>description</strong> - Explanation (optional)</li>
+                                                            </ul>
+                                                        </div>
+                                                        <p>Note: For true_false questions, only the answer column is needed (true or false).</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer text-end">
+                                        <a href="/view-questions" class="btn btn-outline-secondary">Cancel</a>
+                                        <button type="submit" class="btn btn-primary">Import Questions</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get the select category element
+            document.getElementById('defaultSelect').addEventListener('change', function() {
+                const categoryId = this.value;
+                const quizzes = document.getElementById('quizSelect');
+                const options = quizzes.options;
+                
+                // First, hide all options
+                for(let i = 0; i < options.length; i++) {
+                    options[i].style.display = 'none';
+                }
+                
+                // Show matching options
+                for(let i = 0; i < options.length; i++) {
+                    const optionCategoryId = options[i].getAttribute('data-categoryid');
+                    if(optionCategoryId === categoryId) {
+                        options[i].style.display = '';
+                    }
+                }
+                
+                // Reset the quiz select to default option
+                quizzes.value = '';
+                
+                // Force a reflow to ensure the dropdown updates
+                quizzes.style.display = 'none';
+                quizzes.offsetHeight; // Force reflow
+                quizzes.style.display = '';
+            });
+        });
+    </script>
+<%- include('../layout/footer.ejs') %> 
